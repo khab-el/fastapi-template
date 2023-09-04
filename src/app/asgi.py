@@ -3,7 +3,9 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from sqladmin import Admin
 
+from src.app.admin import UserAdmin
 from src.app.exceptions import HTTPException, http_exception_handler
 from src.app.middleware import MetricsMiddleware
 from src.app.modules import AiohttpClient, ThreadClient, AsyncDBClient, init_sentry
@@ -51,5 +53,9 @@ def get_application() -> FastAPI:
     log.debug("Register global exception handler for custom HTTPException.")
     app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_middleware(MetricsMiddleware)
+
+    log.debug("Add admin part.")
+    admin = Admin(app, AsyncDBClient.get_async_db_engine())
+    admin.add_view(UserAdmin)
 
     return app

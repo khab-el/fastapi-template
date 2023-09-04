@@ -30,7 +30,7 @@ class ReadyResponse(BaseModel):
         """
 
         @staticmethod
-        def schema_extra(schema: Dict[str, Any]) -> None:
+        def json_schema_extra(schema: Dict[str, Any]) -> None:
             """Post-process the generated schema.
 
             Method can have one or two positional arguments. The first will be

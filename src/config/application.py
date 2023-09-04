@@ -1,4 +1,6 @@
 """Application configuration - FastAPI."""
+import typing as t
+
 from pydantic_settings import BaseSettings
 
 from src.version import __version__
@@ -31,8 +33,16 @@ class Application(BaseSettings):
     PROJECT_NAME: str = "core"
     VERSION: str = __version__
     DOCS_URL: str = "/"
+    POD_NAME: t.Optional[str] = None
+    GIT_TAG_NAME: t.Optional[str] = None
+    GIT_COMMIT_ID: t.Optional[str] = None
+    ENV: str = "dev" if not POD_NAME else "qa" if "-qa-" in POD_NAME else "prod" if "-prod-" in POD_NAME else "dev"
     # All your additional application configuration should go either here or in
     # separate file in this submodule.
+    MAX_TRIES: int = 3
+    SENTRY_DSN: str = ""
+    DB_URI: str = "postgresql+asyncpg://test:test@127.0.0.1:7433/core"
+    ECHO_SQL: bool = False
 
     class Config:
         """Config sub-class needed to customize BaseSettings settings.

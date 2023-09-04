@@ -7,7 +7,7 @@ import click
 
 from src.cli.serve import serve
 
-cmd_help = "Example CLI root."
+cmd_help = "CLI root."
 
 
 @click.group(help=cmd_help)

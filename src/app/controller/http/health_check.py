@@ -13,13 +13,12 @@ log = logging.getLogger(__name__)
 
 srv_router = APIRouter(
     tags=["helth_check"],
-    include_in_schema=False,
+    # include_in_schema=False,
 )
 
 
 @srv_router.get(
     "/ping",
-    tags=["ready"],
     response_model=ReadyResponse,
     summary="Simple health check.",
     status_code=200,
@@ -42,7 +41,7 @@ async def ping(request: Request) -> JSONResponse:
         )
 
 
-@srv_router.get("/metrics", tags=["ready"])
+@srv_router.get("/metrics")
 async def metrics() -> PlainTextResponse:
     """Prometheus metrics."""
     return PlainTextResponse(pc.generate_latest())

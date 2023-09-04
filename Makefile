@@ -68,6 +68,18 @@ mypy: install  ## Run core mypy checks
 	echo "[mypy] Run example mypy checks."
 	${POETRY_BINARY} run mypy --config-file pyproject.toml $(CODE)
 
+.PHONY: migrate-create
+migrate-create: ## Create a new revision file
+	poetry run alembic revision --autogenerate
+
+.PHONY: migrate-up
+migrate-up: ## Upgrade to a later version
+	poetry run alembic upgrade head
+
+.PHONY: migrate-down
+migrate-down: ## Revert to a previous version
+	poetry run alembic downgrade $(revision)
+
 #* Formatters
 .PHONY: format
 format:  ## Format code
