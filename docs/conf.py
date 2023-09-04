@@ -44,7 +44,7 @@ html_theme = "click"
 html_context = {
     "project_links": [
         ProjectLink("Source Code", "https://gitlab.com/nameless-app/core"),
-    ]
+    ],
 }
 html_sidebars = {
     "index": ["project.html", "localtoc.html", "searchbox.html"],

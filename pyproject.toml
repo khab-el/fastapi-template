@@ -17,6 +17,7 @@ greenlet = "^2.0.2"
 gunicorn = "^21.2.0"
 httpx = "0.23.3"
 itsdangerous = "^2.1.2"
+multimethod = "^1.9.1"
 prometheus-client = "^0.17.1"
 psycopg2-binary = "^2.9.7"
 pydantic = {extras = ["dotenv"], version = "^2.3.0"}
@@ -207,7 +208,7 @@ statistics = true
 max-line-length = 120
 doctests = true
 ignore = ["N999", "D100", "D101", "D104", "D106", "D401", "N999", "W503", "W504", "Q003", "B902", "P101", "P103", "N818",
-    "E203", "E731", "B017", "SIM114", "I100", "I202",
+    "E203", "E731", "B017", "SIM114", "I100", "I202", "I004"
 ]
 no-accept-encodings = true
 exclude = ["*/migrations/*"]
