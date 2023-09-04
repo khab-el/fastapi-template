@@ -24,7 +24,7 @@ class AiohttpClient:
     https://gist.github.com/imbolc/15cab07811c32e7d50cc12f380f7f62f
     """
 
-    sem: asyncio.Semaphore = 10
+    sem: asyncio.Semaphore = asyncio.Semaphore(10)
     aiohttp_client: t.Optional[aiohttp.ClientSession] = None
     log: logging.Logger = logging.getLogger(__name__)
 
@@ -96,7 +96,13 @@ class AiohttpClient:
         """
         async with cls.sem:
             resp = await cls.get_aiohttp_client().request(
-                method=method, url=url, params=params, data=data, json=json, headers=headers, auth=auth,
+                method=method,
+                url=url,
+                params=params,
+                data=data,
+                json=json,
+                headers=headers,
+                auth=auth,
             )
             if resp.status >= 500:
                 resp.raise_for_status()

@@ -64,8 +64,8 @@ docs: ## Build core documentation
 	${POETRY_BINARY} run sphinx-build docs site
 
 .PHONY: mypy
-mypy: install  ## Run core mypy checks
-	echo "[mypy] Run example mypy checks."
+mypy:  ## Run core mypy checks
+	echo "[mypy] Run core mypy checks."
 	${POETRY_BINARY} run mypy --config-file pyproject.toml $(CODE)
 
 .PHONY: migrate-create

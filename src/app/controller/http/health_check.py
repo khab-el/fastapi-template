@@ -2,11 +2,11 @@ import logging
 
 import prometheus_client as pc
 from fastapi import APIRouter, Request, status
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import PlainTextResponse
 from sqlalchemy.engine.result import Result
 
+from src.app.dto import ErrorResponse, ReadyResponse
 from src.app.exceptions import HTTPException
-from src.app.dto import ReadyResponse, ErrorResponse
 from src.app.modules import AsyncDBClient
 
 log = logging.getLogger(__name__)
@@ -24,11 +24,11 @@ srv_router = APIRouter(
     status_code=200,
     responses={502: {"model": ErrorResponse}},
 )
-async def ping(request: Request) -> JSONResponse:
+async def ping(request: Request) -> ReadyResponse:
     """ping."""
     try:
-        async with AsyncDBClient.async_engine.begin() as conn:
-            res: Result = await conn.execute("SELECT 1;")
+        async with AsyncDBClient.async_engine.begin() as conn:  # type: ignore
+            res: Result = await conn.execute("SELECT 1;")  # type: ignore
             return ReadyResponse(status=f"ok: true; db: {bool(await res.scalar())}")
     except Exception:
         log.exception("ping db fail")

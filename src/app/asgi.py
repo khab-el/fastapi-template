@@ -1,4 +1,6 @@
 """Application implementation - ASGI."""
+import typing as t
+
 import logging
 from contextlib import asynccontextmanager
 
@@ -6,17 +8,17 @@ from fastapi import FastAPI
 from sqladmin import Admin
 
 from src.app.admin import UserAdmin
+from src.app.controller.http import api_router
 from src.app.exceptions import HTTPException, http_exception_handler
 from src.app.middleware import MetricsMiddleware
-from src.app.modules import AiohttpClient, ThreadClient, AsyncDBClient, init_sentry
-from src.app.controller.http import api_router
+from src.app.modules import AiohttpClient, AsyncDBClient, ThreadClient, init_sentry
 from src.config import settings
 
 log = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> t.AsyncGenerator[None, t.Any]:
     """Define FastAPI startup shutdown event handler.
 
     Resources:

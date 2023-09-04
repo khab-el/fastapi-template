@@ -20,22 +20,18 @@ class Base:
 
     @classmethod
     @declared_attr
-    def __tablename__(cls):  # noqa: N805 D105
+    def __tablename__(cls) -> str:  # noqa: N805 D105
         return cls.__name__.lower()
 
     def __repr__(self) -> str:  # noqa: D105
         columns = ", ".join(
-            [
-                f"{k}={repr(v)}"
-                for k, v in self.__dict__.items()
-                if not k.startswith("_")
-            ],
+            [f"{k}={repr(v)}" for k, v in self.__dict__.items() if not k.startswith("_")],
         )
         return f"<{self.__class__.__name__}({columns})>"
 
     id = sa.Column(  # noqa: A003
         psql.UUID(as_uuid=True),
-        server_default=sa.text('gen_random_uuid()'),
+        server_default=sa.text("gen_random_uuid()"),
         primary_key=True,
         index=True,
     )

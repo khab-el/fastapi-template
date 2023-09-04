@@ -1,5 +1,6 @@
 """Application implementation - error response."""
-from typing import Dict, Any, Optional, List, Union
+from typing import Any, Dict, List, Optional, Union
+
 from http import HTTPStatus
 
 from pydantic import BaseModel, root_validator

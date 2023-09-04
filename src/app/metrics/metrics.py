@@ -59,13 +59,13 @@ def observe_request(func: t.Callable[P, T]) -> t.Callable[P, T]:
     :rtype: t.Callable[P, T]
     """
 
-    async def _wrap(*args: P.args, **kwargs: P.kwargs) -> Response:
+    async def _wrap(*args: P.args, **kwargs: P.kwargs) -> Response:  # type: ignore
         ts_start = time.monotonic()
         try:
-            resp: Response = await func(*args, **kwargs)
+            resp: Response = await func(*args, **kwargs)  # type: ignore
             elapsed = time.monotonic() - ts_start
 
-            entity = urlparse(resp.url).netloc
+            entity = urlparse(resp.url).netloc  # type: ignore
 
             request_timings.labels(entity).observe(elapsed)
 
