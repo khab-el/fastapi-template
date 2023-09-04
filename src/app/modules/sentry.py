@@ -4,7 +4,7 @@ import sentry_sdk
 
 from src.config import settings
 
-log = logging.getLogger("api.sentry")
+log = logging.getLogger(__name__)
 
 
 def init_sentry(sentry_dsn: str = settings.SENTRY_DSN):  # pragma: no cover

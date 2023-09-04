@@ -5,6 +5,7 @@ import time
 from uuid import uuid4
 
 from sqlalchemy.engine.result import Result
+from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -67,7 +68,13 @@ class AsyncDBClient:
         return await anext(cls._get_session())
 
     @classmethod
-    async def iter_cursor(cls, query: str, params, batch_size=1_000, cur_name_=None):
+    async def iter_cursor(
+        cls,
+        query: str,
+        params: t.Dict[str, t.Any],
+        batch_size: int = 1_000,
+        cur_name_: str | None = None,
+    ) -> t.AsyncIterator[t.Sequence[Row]]:
         """Server side db cursor."""
         cur_name = f"cur_{cur_name_ or uuid4().hex}_{time.time_ns()}"
         query_cursor = f"DECLARE {cur_name} CURSOR FOR {query}"
