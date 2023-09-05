@@ -1,0 +1,63 @@
+---
+
+# Default compose file for development and production.
+# Should be used directly in development.
+# Automatically loads `docker-compose.override.yml` if it exists.
+# No extra steps required.
+# Should be used together with `docker/docker-compose.prod.yml`
+# in production.
+
+version: "3.6"
+services:
+
+  keycloak_db:
+    image: postgres:15
+    networks:
+      - webnet
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5433
+
+  keycloak:
+    image: docker.io/bitnami/keycloak:21.1.1-debian-11-r0
+    depends_on:
+      - keycloak_db
+      # - pubsub
+    networks:
+      - webnet
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_DATABASE_HOST: keycloak_db
+      KEYCLOAK_DATABASE_NAME: keycloak
+      KEYCLOAK_DATABASE_PASSWORD: postgres
+      KEYCLOAK_DATABASE_USER: postgres
+      KEYCLOAK_DATABASE_PORT: 5433
+
+  db:
+    image: postgres:15
+    networks:
+      - webnet
+    environment:
+      POSTGRES_DB: marketplace
+      POSTGRES_USER: marketplace
+      POSTGRES_PASSWORD: marketplace
+      POSTGRES_PORT: 5432
+
+  service:
+    <<: &service
+      image: marketplace-entertainment-service
+      build:
+        context: .
+        dockerfile: ./Dockerfile
+      depends_on:
+        - db
+        - keycloak
+      networks:
+        - webnet
+      env_file: ./config/.env
+
+networks:
+  webnet:
