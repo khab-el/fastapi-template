@@ -1,3 +1,4 @@
+import typing as t
 import logging
 
 import prometheus_client as pc
@@ -27,8 +28,8 @@ srv_router = APIRouter(
 async def ping(request: Request) -> ReadyResponse:
     """ping."""
     try:
-        async with AsyncDBClient.async_engine.begin() as conn:  # type: ignore
-            res: Result = await conn.execute("SELECT 1;")  # type: ignore
+        async with AsyncDBClient.async_engine.begin() as conn:
+            res: t.Awaitable[Result] = await conn.execute("SELECT 1;")
             return ReadyResponse(status=f"ok: true; db: {bool(await res.scalar())}")
     except Exception:
         log.exception("ping db fail")
