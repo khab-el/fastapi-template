@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Marketplace Entertainment Service"
 authors = ["Eldar Khabibulin <exabib@gmail.com>"]
 readme = "README.md"
-repository = "https://gitlab.com/nameless-app/core"
+repository = "https://github.com/khab-el/fastapi-template/"
 packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
