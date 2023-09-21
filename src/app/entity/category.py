@@ -5,8 +5,7 @@ import typing as t
 from uuid import UUID
 
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql as psql
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.entity.base import Base
 from src.app.entity.mixin import TimestampMixin
@@ -17,21 +16,15 @@ if t.TYPE_CHECKING:
 
 class Category(TimestampMixin, Base):
 
-    id = sa.Column(  # noqa: A003
-        psql.UUID(as_uuid=True),
-        server_default=sa.text("gen_random_uuid()"),
-        primary_key=True,
-        index=True,
-    )
-    category_title: Mapped[str] = sa.Column(sa.String(255), nullable=True)
-    category_description: Mapped[str] = sa.Column(sa.String(255), nullable=True)
+    category_title: Mapped[str] = mapped_column(sa.String(255), nullable=True)
+    category_description: Mapped[str] = mapped_column(sa.String(255), nullable=True)
 
-    parent_category_id: Mapped[list[UUID]] = sa.Column(sa.UUID, sa.ForeignKey("category.id"), nullable=True)
-    parent_category: Mapped[t.Self] = relationship(
+    parent_category_id: Mapped[list[UUID]] = mapped_column(sa.ForeignKey("category.id"), nullable=True)
+    parent_category: Mapped["t.Self"] = relationship(
         "Category",
-        remote_side=[id],
+        remote_side="category.id",
     )
-    service: Mapped[Service] = relationship(
+    service: Mapped["Service"] = relationship(
         "Service",
         secondary="category_x_service",
         back_populates="category",

@@ -1,10 +1,9 @@
-import typing as t
 import logging
 
 import prometheus_client as pc
 from fastapi import APIRouter, Request, status
 from fastapi.responses import PlainTextResponse
-from sqlalchemy.engine.result import Result
+from sqlalchemy import text
 
 from src.app.dto import ErrorResponse, ReadyResponse
 from src.app.exceptions import HTTPException
@@ -29,9 +28,9 @@ async def ping(request: Request) -> ReadyResponse:
     """ping."""
     try:
         async with AsyncDBClient.async_engine.begin() as conn:
-            res: t.Awaitable[Result] = await conn.execute("SELECT 1;")
-            return ReadyResponse(status=f"ok: true; db: {bool(await res.scalar())}")
-    except Exception:
+            res = await conn.execute(text("SELECT 1;"))
+            return ReadyResponse(status=f"ok: true; db: {bool(res.scalar())}")
+    except Exception as exc:
         log.exception("ping db fail")
         raise HTTPException(
             status.HTTP_502_BAD_GATEWAY,
@@ -39,7 +38,7 @@ async def ping(request: Request) -> ReadyResponse:
                 code=status.HTTP_502_BAD_GATEWAY,
                 message="Could not connect to PostgreSQL",
             ).model_dump(exclude_none=True),
-        )
+        ) from exc
 
 
 @srv_router.get("/metrics")

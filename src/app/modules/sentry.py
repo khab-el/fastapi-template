@@ -7,9 +7,9 @@ from src.config import settings
 log = logging.getLogger(__name__)
 
 
-def init_sentry(sentry_dsn: str = settings.SENTRY_DSN):  # pragma: no cover
+def init_sentry(sentry_dsn: str = settings.SENTRY_DSN) -> None:
     """Init sentry."""
-    if sentry_dsn is None:
+    if not sentry_dsn:
         log.warning("sentry dsn is not set")
         return
 

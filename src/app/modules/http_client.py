@@ -24,8 +24,9 @@ class AiohttpClient:
     https://gist.github.com/imbolc/15cab07811c32e7d50cc12f380f7f62f
     """
 
+    _client_flg: bool = False
     sem: asyncio.Semaphore = asyncio.Semaphore(10)
-    aiohttp_client: t.Optional[aiohttp.ClientSession] = None
+    aiohttp_client: aiohttp.ClientSession
     log: logging.Logger = logging.getLogger(__name__)
 
     @classmethod
@@ -36,7 +37,7 @@ class AiohttpClient:
             AsyncClient: AsyncClient object instance.
 
         """
-        if cls.aiohttp_client is None:
+        if not cls._client_flg:
             cls.log.debug("Initialize AiohttpClient session.")
             timeout = aiohttp.ClientTimeout(total=2)
             connector = aiohttp.TCPConnector(
@@ -47,16 +48,17 @@ class AiohttpClient:
                 timeout=timeout,
                 connector=connector,
             )
+            cls._client_flg = True
 
         return cls.aiohttp_client
 
     @classmethod
     async def close_aiohttp_client(cls) -> None:
         """Close aiohttp client session."""
-        if cls.aiohttp_client:
+        if cls._client_flg:
             cls.log.debug("Close AiohttpClient session.")
             await cls.aiohttp_client.close()
-            cls.aiohttp_client = None
+            cls._client_flg = False
 
     @classmethod
     @backoff.on_exception(

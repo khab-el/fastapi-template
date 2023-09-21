@@ -15,27 +15,31 @@ class ThreadClient:
 
     """
 
+    thread_flg: bool = False
     n_workers: int = 2
-    thread_executor: t.Optional[concurrent.futures.ThreadPoolExecutor] = None
-    loop: t.Optional[asyncio.AbstractEventLoop] = None
+    thread_executor: concurrent.futures.ThreadPoolExecutor
+    loop: asyncio.AbstractEventLoop
     log: logging.Logger = logging.getLogger(__name__)
 
     @classmethod
     def get_thread_pool_client(cls) -> concurrent.futures.ThreadPoolExecutor:
         """Create Thread pool."""
-        if cls.thread_executor is None:
+        if not cls.thread_flg:
             cls.thread_executor = concurrent.futures.ThreadPoolExecutor(cls.n_workers)
             cls.loop = asyncio.get_running_loop()
+            cls.thread_flg = True
 
         return cls.thread_executor
 
     @classmethod
     async def close_thread_pool_executor(cls) -> None:
         """Close tread pool."""
-        cls.thread_executor.shutdown(wait=True)
+        if cls.thread_flg:
+            cls.thread_executor.shutdown(wait=True)
+            cls.thread_flg = False
 
     @classmethod
-    async def execute(cls, func: t.Callable, *args: t.Any) -> t.Any:
+    async def execute(cls, func: t.Callable[..., t.Any], *args: t.Any) -> t.Any:
         """Exec func in treads."""
         thread_executor = cls.get_thread_pool_client()
 

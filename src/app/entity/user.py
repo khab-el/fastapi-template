@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.app.entity.base import Base
 from src.app.entity.mixin import TimestampMixin
@@ -11,6 +12,6 @@ class User(TimestampMixin, Base):
         sa.UniqueConstraint("email"),
     )
 
-    username = sa.Column(sa.String(255), nullable=False)
-    phone = sa.Column(sa.String(255), nullable=True)
-    email = sa.Column(sa.String(255), index=True, nullable=False)
+    username: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    phone: Mapped[str] = mapped_column(sa.String(255), nullable=True)
+    email: Mapped[str] = mapped_column(sa.String(255), index=True, nullable=False)

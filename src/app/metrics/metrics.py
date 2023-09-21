@@ -4,11 +4,10 @@ import time
 from urllib.parse import urlparse
 
 import prometheus_client as pc
-from httpx import Response
+from aiohttp import ClientResponse
 
 from src.config import settings
 
-T = t.TypeVar("T")
 P = t.ParamSpec("P")
 
 
@@ -50,7 +49,9 @@ request_timings = pc.Histogram(
 )
 
 
-def observe_request(func: t.Callable[P, T]) -> t.Callable[P, T]:
+def observe_request(
+    func: t.Callable[P, t.Awaitable[ClientResponse]],
+) -> t.Callable[P, t.Coroutine[t.Any, t.Any, ClientResponse]]:
     """Observe request to service.
 
     :param func: _description_
@@ -59,13 +60,13 @@ def observe_request(func: t.Callable[P, T]) -> t.Callable[P, T]:
     :rtype: t.Callable[P, T]
     """
 
-    async def _wrap(*args: P.args, **kwargs: P.kwargs) -> Response:  # type: ignore
+    async def _wrap(*args: P.args, **kwargs: P.kwargs) -> ClientResponse:
         ts_start = time.monotonic()
         try:
-            resp: Response = await func(*args, **kwargs)  # type: ignore
+            resp: ClientResponse = await func(*args, **kwargs)
             elapsed = time.monotonic() - ts_start
 
-            entity = urlparse(resp.url).netloc  # type: ignore
+            entity = urlparse(str(resp.url)).netloc
 
             request_timings.labels(entity).observe(elapsed)
 
