@@ -41,8 +41,11 @@ class Application(BaseSettings):
     # separate file in this submodule.
     MAX_TRIES: int = 3
     SENTRY_DSN: str = ""
-    DB_URI: str = "postgresql+asyncpg://test:test@127.0.0.1:7433/core"
-    ECHO_SQL: bool = False
+    ORACLE_HOST: str = ""
+    ORACLE_PORT: int = 1521
+    ORACLE_USER: str = ""
+    ORACLE_PASSWORD: str = ""
+    ORACLE_SERVICE_NAME: str = ""
 
     class Config:
         """Config sub-class needed to customize BaseSettings settings.

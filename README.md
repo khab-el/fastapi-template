@@ -1,12 +1,3 @@
-# Marketplace-Core
+# Core
 ---
-
-### Documentation
-
-
-To build docs manually:
-```shell
-make docs
-```
-
-Then open `./site/index.html` with any browser.
+core serve --bind 0.0.0.0:8000
