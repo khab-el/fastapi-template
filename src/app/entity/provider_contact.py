@@ -6,7 +6,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.entity.base import Base
-from src.app.entity.mixin import TimestampMixin, IDMixin
+from src.app.entity.mixin import IDMixin, TimestampMixin
 
 if t.TYPE_CHECKING:
     from src.app.entity.provider_entity import ProviderEnity

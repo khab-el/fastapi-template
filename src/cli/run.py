@@ -4,6 +4,9 @@ from typing import Any, Dict
 import click
 import uvicorn
 
+from src.config import settings
+from src.config.logger import log_config
+
 cmd_short_help = "Run development server."
 cmd_help = """\
 Run development uvicorn (ASGI) server.
@@ -36,5 +39,7 @@ def run(ctx: click.Context, **options: Dict[str, Any]) -> None:
         host="0.0.0.0",
         port=8000,
         access_log=True,
+        log_level=settings.DEBUG,
+        log_config=log_config,
         reload=True,
     )

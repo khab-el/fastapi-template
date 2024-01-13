@@ -2,7 +2,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.app.entity.base import Base
-from src.app.entity.mixin import TimestampMixin, IDMixin
+from src.app.entity.mixin import IDMixin, TimestampMixin
 
 
 class User(TimestampMixin, IDMixin, Base):

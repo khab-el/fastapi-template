@@ -16,7 +16,7 @@ from src.app.entity.base import Base
 @declarative_mixin
 class IDMixin:
 
-    __mapper_args__ = {'always_refresh': True, "eager_defaults": True}
+    __mapper_args__ = {"always_refresh": True, "eager_defaults": True}
 
     id: Mapped[UUID] = mapped_column(  # noqa: A003
         psql.UUID(as_uuid=True),

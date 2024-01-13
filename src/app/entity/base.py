@@ -1,5 +1,8 @@
+import typing as t
+
+import sqlalchemy as sa
 from sqlalchemy import MetaData
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
 convention = {
@@ -26,3 +29,11 @@ class Base:
     @declared_attr
     def __tablename__(cls) -> str:  # noqa: N805 D105
         return cls.__name__.lower()
+
+    @classmethod
+    async def get_all(cls, async_session: AsyncSession) -> t.List[t.Optional["Base"]]:
+        """Select from db single model by pk - id."""
+        stmt = sa.select(cls)
+        async_result = await async_session.execute(stmt)
+        objects_all = await async_result.fetchall()
+        return objects_all

@@ -1,8 +1,6 @@
 from sqladmin import ModelView
-from sqlalchemy import orm
 
 from src.app.entity import User
-
 
 # # Create a registry to hold mapper details.
 # mapper_registry = orm.registry()
@@ -15,6 +13,7 @@ from src.app.entity import User
 
 # mapper_registry.map_imperatively(UserHelper, User)
 # mapper = orm.Mapper(User)s
+
 
 class UserAdmin(ModelView, model=User):
     column_list = [User.id, User.username, User.phone, User.email]
