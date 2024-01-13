@@ -45,7 +45,7 @@ class IDMixin:
 
 
 @declarative_mixin
-class TimestampMixin:
+class TimestampMixin(IDMixin):
     """Nested IDMixin (not need use IDMixin in orm model)."""
 
     created_at: Mapped[datetime] = mapped_column(
@@ -73,6 +73,6 @@ class TimestampMixin:
     @classmethod
     async def delete(cls, async_session: AsyncSession, object_id: UUID) -> None:
         """Soft delete model from db."""
-        object_instance = await cls.find_one_or_fail(async_session, object_id)
-        cls.merge(object_instance, deleted_at=sa.func.now())
-        await cls.save(async_session, object_instance)
+        object_instance = await cls.find_one_or_fail(async_session, object_id)  # type: ignore
+        cls.merge(object_instance, deleted_at=sa.func.now())  # type: ignore
+        await cls.save(async_session, object_instance)  # type: ignore

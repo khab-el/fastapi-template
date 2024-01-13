@@ -53,7 +53,7 @@ class Base(DeclarativeBase):
         return bool(cls.get_pk(object_instance))
 
     @classmethod
-    async def get_all(cls, async_session: AsyncSession) -> t.List[t.Optional["Base"]]:
+    async def get_all(cls, async_session: AsyncSession) -> t.List[t.Optional["Base"]]:  # type: ignore
         """Select from db single model by pk - id."""
         stmt = sa.select(cls)
         async_result = await async_session.execute(statement=stmt)
@@ -71,7 +71,7 @@ class Base(DeclarativeBase):
 
     @classmethod
     @pre_save.register
-    async def _(cls, async_session: AsyncSession, instances: t.Sequence["Base"]) -> t.Sequence["Base"]:  # noqa
+    async def _(cls, async_session: AsyncSession, instances: t.Sequence["Base"]) -> t.Sequence["Base"]:
         async_session.add_all(instances)
         await async_session.flush(instances)
         return instances
@@ -84,7 +84,7 @@ class Base(DeclarativeBase):
 
     @classmethod
     @save.register
-    async def _(cls, async_session: AsyncSession, instances: t.Sequence["Base"]) -> t.Sequence["Base"]:  # noqa
+    async def _(cls, async_session: AsyncSession, instances: t.Sequence["Base"]) -> t.Sequence["Base"]:
         instances = await cls.pre_save(async_session, instances)
         await async_session.commit()
         return instances

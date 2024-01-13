@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 DBSessionDep = t.Annotated[AsyncSession, Depends(AsyncDBClient.get_db_session)]
 
 
-async def get_db_session(request: Request, db_session: DBSessionDep):
+async def get_db_session(request: Request, db_session: DBSessionDep) -> None:
     """Provide session into each request."""
     request.state.db_session = db_session
 

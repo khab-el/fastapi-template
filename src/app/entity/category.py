@@ -8,13 +8,13 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.entity.base import Base
-from src.app.entity.mixin import IDMixin, TimestampMixin
+from src.app.entity.mixin import TimestampMixin
 
 if t.TYPE_CHECKING:
     from src.app.entity.service import Service
 
 
-class Category(IDMixin, TimestampMixin, Base):
+class Category(TimestampMixin, Base):
 
     category_title: Mapped[str] = mapped_column(sa.String(255), nullable=True)
     category_description: Mapped[str] = mapped_column(sa.String(255), nullable=True)

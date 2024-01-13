@@ -8,14 +8,14 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.entity.base import Base
-from src.app.entity.mixin import IDMixin, TimestampMixin
+from src.app.entity.mixin import TimestampMixin
 
 if t.TYPE_CHECKING:
     from src.app.entity.provider_contact import ProviderContact
     from src.app.entity.service import Service
 
 
-class ProviderEnity(TimestampMixin, IDMixin, Base):
+class ProviderEnity(TimestampMixin, Base):
 
     address: Mapped[str] = mapped_column(sa.String(255), nullable=True)
     primary_phone: Mapped[str] = mapped_column(sa.String(255), nullable=True)

@@ -40,4 +40,4 @@ LOG_CONFIG = dict(  # noqa
         },
     },
 )
-log_config = dictConfig(LOG_CONFIG)
+log_config = dictConfig(LOG_CONFIG)  # type: ignore

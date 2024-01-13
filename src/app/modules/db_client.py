@@ -73,7 +73,7 @@ class AsyncDBClient:
             await session.close()
 
     @classmethod
-    async def get_db_session(cls):
+    async def get_db_session(cls) -> t.AsyncIterator[AsyncSession]:
         """Get db session."""
         async with cls.session() as session:
             yield session

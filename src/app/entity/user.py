@@ -2,10 +2,10 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.app.entity.base import Base
-from src.app.entity.mixin import IDMixin, TimestampMixin
+from src.app.entity.mixin import TimestampMixin
 
 
-class User(IDMixin, TimestampMixin, Base):
+class User(TimestampMixin, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("username"),
