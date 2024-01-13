@@ -16,6 +16,8 @@ from src.app.entity.base import Base
 @declarative_mixin
 class IDMixin:
 
+    __mapper_args__ = {'always_refresh': True, "eager_defaults": True}
+
     id: Mapped[UUID] = mapped_column(  # noqa: A003
         psql.UUID(as_uuid=True),
         server_default=sa.text("gen_random_uuid()"),
@@ -106,7 +108,7 @@ class IDMixin:
 
 
 @declarative_mixin
-class TimestampMixin(IDMixin):
+class TimestampMixin:
     """Nested IDMixin (not need use IDMixin in orm model)."""
 
     created_at: Mapped[datetime] = mapped_column(
@@ -120,7 +122,7 @@ class TimestampMixin(IDMixin):
         server_default=sa.FetchedValue(),
         server_onupdate=sa.FetchedValue(),
     )
-    deleted_at: Mapped[datetime] = mapped_column(sa.DateTime, server_default=sa.FetchedValue())
+    deleted_at: Mapped[datetime] = mapped_column(sa.DateTime, server_default=sa.FetchedValue(), nullable=True)
 
     @classmethod
     async def find_one(cls, async_session: AsyncSession, object_id: UUID) -> t.Optional["Base"]:

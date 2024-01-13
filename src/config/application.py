@@ -32,7 +32,7 @@ class Application(BaseSettings):
     DEBUG: bool = True
     PROJECT_NAME: str = "core"
     VERSION: str = __version__
-    DOCS_URL: str = "/"
+    DOCS_URL: str = "/api/docs"
     POD_NAME: t.Optional[str] = None
     GIT_TAG_NAME: t.Optional[str] = None
     GIT_COMMIT_ID: t.Optional[str] = None

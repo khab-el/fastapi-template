@@ -6,14 +6,14 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.app.entity.base import Base
-from src.app.entity.mixin import TimestampMixin
+from src.app.entity.mixin import TimestampMixin, IDMixin
 
 if t.TYPE_CHECKING:
     from src.app.entity.provider_entity import ProviderEnity
     from src.app.entity.provider_photo import ProviderPhoto
 
 
-class ProviderContact(TimestampMixin, Base):
+class ProviderContact(TimestampMixin, IDMixin, Base):
 
     name: Mapped[str] = mapped_column(sa.String(255), nullable=False)
     phone: Mapped[str] = mapped_column(sa.String(255), nullable=True)

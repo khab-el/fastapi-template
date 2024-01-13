@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5e235bbba1fc
+Revision ID: f36f8c844719
 Revises: 
-Create Date: 2023-09-13 20:24:38.767450
+Create Date: 2024-01-13 15:16:36.208157
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from sqlalchemy import FetchedValue
 
 
 # revision identifiers, used by Alembic.
-revision = "5e235bbba1fc"
+revision = "f36f8c844719"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,7 +29,7 @@ def upgrade():
         sa.Column("parent_category_id", sa.UUID(), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["parent_category_id"],
@@ -46,7 +46,7 @@ def upgrade():
         sa.Column("additional_info", sa.String(length=255), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -58,7 +58,7 @@ def upgrade():
         sa.Column("email", sa.String(length=255), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
@@ -76,7 +76,7 @@ def upgrade():
         sa.Column("provider_contact_id", sa.UUID(), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["provider_contact_id"],
@@ -105,7 +105,7 @@ def upgrade():
         sa.Column("provider_entity_id", sa.UUID(), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["provider_entity_id"],

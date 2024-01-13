@@ -1,4 +1,5 @@
 from sqlalchemy import MetaData
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
 convention = {

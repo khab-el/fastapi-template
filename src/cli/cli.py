@@ -5,6 +5,7 @@ import logging
 
 import click
 
+from src.cli.run import run
 from src.cli.serve import serve
 
 cmd_help = "CLI root."
@@ -39,3 +40,4 @@ def cli(**options: Dict[str, Any]) -> None:
 
 
 cli.add_command(serve)
+cli.add_command(run)

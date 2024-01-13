@@ -6,7 +6,7 @@ from multiprocessing import cpu_count
 import click
 
 from src import ApplicationLoader
-from src.app import get_application
+from src.app import app
 from src.cli.utils import validate_directory
 
 cmd_short_help = "Run production server."
@@ -79,6 +79,6 @@ def serve(ctx: click.Context, **options: Dict[str, Any]) -> None:
 
     # https://fastapi.tiangolo.com/deployment/server-workers/
     ApplicationLoader(
-        application=get_application(),
+        application=app,
         overrides=overrides,
     ).run()

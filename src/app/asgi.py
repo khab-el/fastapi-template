@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from sqladmin import Admin
 
 from src.app.admin import UserAdmin
-from src.app.controller.http import api_router
+from src.app.controller.http import api_router, srv_router
 from src.app.exceptions import HTTPException, http_exception_handler
 from src.app.middleware import MetricsMiddleware
 from src.app.modules import AiohttpClient, AsyncDBClient, ThreadClient, init_sentry
@@ -50,6 +50,8 @@ def get_application() -> FastAPI:
         docs_url=settings.DOCS_URL,
         lifespan=lifespan,
     )
+    log.debug("Add helth check routes.")
+    app.include_router(srv_router)
     log.debug("Add application routes.")
     app.include_router(api_router, prefix="/api")
     log.debug("Register global exception handler for custom HTTPException.")
@@ -57,7 +59,10 @@ def get_application() -> FastAPI:
     app.add_middleware(MetricsMiddleware)
 
     log.debug("Add admin part.")
-    admin = Admin(app, AsyncDBClient.get_async_db_engine())
-    admin.add_view(UserAdmin)
+    # admin = Admin(app, AsyncDBClient.get_async_db_engine())
+    # admin.add_view(UserAdmin)
 
     return app
+
+
+app = get_application()
