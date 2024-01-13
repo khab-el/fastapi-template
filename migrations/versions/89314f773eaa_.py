@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 33a3b8cd3101
+Revision ID: 89314f773eaa
 Revises: 
-Create Date: 2024-01-13 16:01:47.723332
+Create Date: 2024-01-13 22:17:49.774510
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from sqlalchemy import FetchedValue
 
 
 # revision identifiers, used by Alembic.
-revision = "33a3b8cd3101"
+revision = "89314f773eaa"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,10 +32,9 @@ def upgrade():
         sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["parent_category_id"],
-            ["category.id"],
+            ["parent_category_id"], ["category.id"], name=op.f("fk_category_parent_category_id_category")
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_category")),
     )
     op.create_index(op.f("ix_category_id"), "category", ["id"], unique=False)
     op.create_table(
@@ -48,7 +47,7 @@ def upgrade():
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_providercontact")),
     )
     op.create_index(op.f("ix_providercontact_id"), "providercontact", ["id"], unique=False)
     op.create_table(
@@ -60,9 +59,9 @@ def upgrade():
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("email"),
-        sa.UniqueConstraint("username"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_user")),
+        sa.UniqueConstraint("email", name=op.f("uq_user_email")),
+        sa.UniqueConstraint("username", name=op.f("uq_user_username")),
     )
     op.create_index(op.f("ix_user_email"), "user", ["email"], unique=False)
     op.create_index(op.f("ix_user_id"), "user", ["id"], unique=False)
@@ -81,8 +80,9 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["provider_contact_id"],
             ["providercontact.id"],
+            name=op.f("fk_providerenity_provider_contact_id_providercontact"),
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_providerenity")),
     )
     op.create_index(op.f("ix_providerenity_id"), "providerenity", ["id"], unique=False)
     op.create_table(
@@ -93,8 +93,9 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["provider_contact_id"],
             ["providercontact.id"],
+            name=op.f("fk_providerphoto_provider_contact_id_providercontact"),
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_providerphoto")),
     )
     op.create_index(op.f("ix_providerphoto_id"), "providerphoto", ["id"], unique=False)
     op.create_table(
@@ -108,10 +109,9 @@ def upgrade():
         sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["provider_entity_id"],
-            ["providerenity.id"],
+            ["provider_entity_id"], ["providerenity.id"], name=op.f("fk_service_provider_entity_id_providerenity")
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_service")),
     )
     op.create_index(op.f("ix_service_id"), "service", ["id"], unique=False)
     op.create_table(
@@ -119,14 +119,10 @@ def upgrade():
         sa.Column("category_id", sa.UUID(), nullable=False),
         sa.Column("service_id", sa.UUID(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["category_id"],
-            ["category.id"],
+            ["category_id"], ["category.id"], name=op.f("fk_category_x_service_category_id_category")
         ),
-        sa.ForeignKeyConstraint(
-            ["service_id"],
-            ["service.id"],
-        ),
-        sa.PrimaryKeyConstraint("category_id", "service_id"),
+        sa.ForeignKeyConstraint(["service_id"], ["service.id"], name=op.f("fk_category_x_service_service_id_service")),
+        sa.PrimaryKeyConstraint("category_id", "service_id", name=op.f("pk_category_x_service")),
     )
     # ### end Alembic commands ###
 

@@ -55,6 +55,7 @@ class TimestampMixin(IDMixin):
     )
     updated_at: Mapped[datetime] = mapped_column(
         sa.DateTime,
+        default=sa.func.now(),
         onupdate=sa.func.now(),
         server_default=sa.FetchedValue(),
         server_onupdate=sa.FetchedValue(),
