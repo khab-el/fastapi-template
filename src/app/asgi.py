@@ -4,10 +4,9 @@ import typing as t
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-from sqladmin import Admin
+from fastapi import Depends, FastAPI, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.admin import UserAdmin
 from src.app.controller.http import api_router, srv_router
 from src.app.exceptions import HTTPException, http_exception_handler
 from src.app.middleware import MetricsMiddleware
@@ -15,6 +14,13 @@ from src.app.modules import AiohttpClient, AsyncDBClient, ThreadClient, init_sen
 from src.config import settings
 
 log = logging.getLogger(__name__)
+
+DBSessionDep = t.Annotated[AsyncSession, Depends(AsyncDBClient.get_db_session)]
+
+
+async def get_db_session(request: Request, db_session: DBSessionDep):
+    """Provide session into each request."""
+    request.state.db_session = db_session
 
 
 @asynccontextmanager
@@ -49,6 +55,7 @@ def get_application() -> FastAPI:
         version=settings.VERSION,
         docs_url=settings.DOCS_URL,
         lifespan=lifespan,
+        dependencies=[Depends(get_db_session)],
     )
     log.debug("Add helth check routes.")
     app.include_router(srv_router)
@@ -59,8 +66,8 @@ def get_application() -> FastAPI:
     app.add_middleware(MetricsMiddleware)
 
     log.debug("Add admin part.")
-    admin = Admin(app, AsyncDBClient.get_async_db_engine())
-    admin.add_view(UserAdmin)
+    # admin = Admin(app, AsyncDBClient.get_async_db_engine())
+    # admin.add_view(UserAdmin)
 
     return app
 

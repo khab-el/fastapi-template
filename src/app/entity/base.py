@@ -1,11 +1,11 @@
 import typing as t
 
 import sqlalchemy as sa
+from multimethod import multimethod as overload
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from multimethod import multimethod as overload
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -16,18 +16,16 @@ convention = {
 }
 
 
-# @as_declarative()
 class Base(DeclarativeBase):
 
-    # __name__: str
+    __abstract__ = True
     metadata = MetaData(naming_convention=convention)  # type: ignore
-    __mapper_args__ = {"eager_defaults": True}
 
-    # def __repr__(self) -> str:  # noqa: D105
-    #     columns = ", ".join(
-    #         [f"{k}={repr(v)}" for k, v in self.__dict__.items() if not k.startswith("_")],
-    #     )
-    #     return f"<{self.__class__.__name__}({columns})>"
+    def __repr__(self) -> str:  # noqa: D105
+        columns = ", ".join(
+            [f"{k}={repr(v)}" for k, v in self.__dict__.items() if not k.startswith("_")],
+        )
+        return f"<{self.__class__.__name__}({columns})>"
 
     @declared_attr.directive
     def __tablename__(cls) -> str:  # noqa: N805 D105
@@ -38,9 +36,7 @@ class Base(DeclarativeBase):
         """Get pk."""
         server_default_pks = (pk for pk in cls.__mapper__.primary_key if pk.server_default is not None)  # type: ignore
         pks = {
-            pk.name: attr
-            for pk in server_default_pks
-            if (attr := getattr(object_instance, pk.name)) is not None
+            pk.name: attr for pk in server_default_pks if (attr := getattr(object_instance, pk.name)) is not None
         }  # noqa, type: ignore
 
         if len(pks) == 1:
@@ -60,8 +56,8 @@ class Base(DeclarativeBase):
     async def get_all(cls, async_session: AsyncSession) -> t.List[t.Optional["Base"]]:
         """Select from db single model by pk - id."""
         stmt = sa.select(cls)
-        async_result = await async_session.execute(stmt)
-        objects_all = await async_result.fetchall()
+        async_result = await async_session.execute(statement=stmt)
+        objects_all = async_result.fetchall()
         return objects_all
 
     @overload

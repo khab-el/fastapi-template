@@ -4,7 +4,6 @@ from datetime import datetime
 from uuid import UUID
 
 import sqlalchemy as sa
-from multimethod import multimethod as overload
 from sqlalchemy.dialects import postgresql as psql
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,8 +14,6 @@ from src.app.entity.base import Base
 
 @declarative_mixin
 class IDMixin:
-
-    # __mapper_args__ = {"always_refresh": True, "eager_defaults": True}
 
     id: Mapped[UUID] = mapped_column(  # noqa: A003
         psql.UUID(as_uuid=True),

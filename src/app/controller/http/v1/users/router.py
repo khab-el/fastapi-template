@@ -4,7 +4,6 @@ from fastapi import APIRouter, Request
 
 from src.app.dto import ErrorResponse
 from src.app.entity import User
-from src.app.modules import AsyncDBClient
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +20,5 @@ users_router = APIRouter(
 )
 async def get_users(request: Request):
     """ping."""
-    async with AsyncDBClient.async_engine.begin() as conn:
-        res = await User.get_all(conn)
-        return res
+    res = await User.get_all(request.state.db_session)
+    return res

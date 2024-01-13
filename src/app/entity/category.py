@@ -14,7 +14,7 @@ if t.TYPE_CHECKING:
     from src.app.entity.service import Service
 
 
-class Category(TimestampMixin, IDMixin, Base):
+class Category(IDMixin, TimestampMixin, Base):
 
     category_title: Mapped[str] = mapped_column(sa.String(255), nullable=True)
     category_description: Mapped[str] = mapped_column(sa.String(255), nullable=True)
@@ -22,7 +22,7 @@ class Category(TimestampMixin, IDMixin, Base):
     parent_category_id: Mapped[list[UUID]] = mapped_column(sa.ForeignKey("category.id"), nullable=True)
     parent_category: Mapped["t.Self"] = relationship(
         "Category",
-        remote_side="category.id",
+        remote_side="Category.id",
     )
     service: Mapped["Service"] = relationship(
         "Service",

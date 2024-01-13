@@ -5,7 +5,7 @@ from src.app.entity.base import Base
 from src.app.entity.mixin import IDMixin, TimestampMixin
 
 
-class User(TimestampMixin, IDMixin, Base):
+class User(IDMixin, TimestampMixin, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("username"),

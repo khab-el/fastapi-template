@@ -1,5 +1,6 @@
 import typing as t
 
+import contextlib
 import logging
 import time
 from uuid import uuid4
@@ -21,7 +22,7 @@ class AsyncDBClient:
 
     _connection_flg: bool = False
     async_engine: AsyncEngine
-    AsyncSessionLocal: async_sessionmaker[AsyncSession]
+    sessionmaker: async_sessionmaker[AsyncSession]
     log: logging.Logger = logging.getLogger(__name__)
 
     @classmethod
@@ -38,7 +39,7 @@ class AsyncDBClient:
                 pool_pre_ping=True,
                 echo=settings.ECHO_SQL,
             )
-            cls.AsyncSessionLocal = async_sessionmaker(
+            cls.sessionmaker = async_sessionmaker(
                 bind=cls.async_engine,
                 expire_on_commit=False,
                 autoflush=False,
@@ -55,21 +56,27 @@ class AsyncDBClient:
             cls._connection_flg = False
 
     @classmethod
-    async def _get_session(cls) -> t.AsyncIterator[async_sessionmaker[AsyncSession]]:
-        """Helper."""
+    @contextlib.asynccontextmanager
+    async def session(cls) -> t.AsyncIterator[AsyncSession]:
+        """Create session."""
+        if cls.sessionmaker is None:
+            raise Exception("DatabaseSessionManager is not initialized")
+
+        session = cls.sessionmaker()
         try:
-            yield cls.AsyncSessionLocal
+            yield session
         except SQLAlchemyError as e:
             cls.log.exception(e)
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
     @classmethod
-    async def get_session(cls) -> async_sessionmaker[AsyncSession]:
-        """Get async db session.
-
-        :return: _description_
-        :rtype: async_sessionmaker
-        """
-        return await anext(cls._get_session())
+    async def get_db_session(cls):
+        """Get db session."""
+        async with cls.session() as session:
+            yield session
 
     @classmethod
     async def iter_cursor(
