@@ -5,8 +5,10 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request
+from sqladmin import Admin
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.app.admin import UserAdmin
 from src.app.controller.http import api_router, srv_router
 from src.app.exceptions import HTTPException, http_exception_handler
 from src.app.middleware import MetricsMiddleware
@@ -66,8 +68,8 @@ def get_application() -> FastAPI:
     app.add_middleware(MetricsMiddleware)
 
     log.debug("Add admin part.")
-    # admin = Admin(app, AsyncDBClient.get_async_db_engine())
-    # admin.add_view(UserAdmin)
+    admin = Admin(app, AsyncDBClient.get_async_db_engine())
+    admin.add_view(UserAdmin)
 
     return app
 
