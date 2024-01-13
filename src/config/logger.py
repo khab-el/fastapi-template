@@ -10,7 +10,7 @@ LOG_CONFIG = dict(  # noqa
         "generic": {
             "format": "%(asctime)s [%(process)d] [%(levelname)s] [info:%(filename)s:%(funcName)s:%(lineno)s] %(message)s",  # noqa
             "datefmt": "[%Y-%m-%d %H:%M:%S %z]",
-            "class": "logging.Formatter",
+            "class": "coloredlogs.ColoredFormatter",
         },
     },
     handlers={
