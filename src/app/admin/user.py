@@ -13,6 +13,7 @@ class UserAdmin(ModelView, model=User):
     ]
 
     # async def insert_model(self, request, data):
+    #     from src.app.modules import AsyncDBClient
     #     user = User(**data)
-    #     user.save(request.state.db_session, user)
-    #     return await super().insert_model(request, data)
+    #     db_session = await anext(AsyncDBClient.get_db_session())
+    #     return await user.save(db_session)

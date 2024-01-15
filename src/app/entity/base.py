@@ -31,12 +31,11 @@ class Base(DeclarativeBase):
     def __tablename__(cls) -> str:  # noqa: N805 D105
         return cls.__name__.lower()
 
-    @classmethod
-    def get_pk(cls, object_instance: "Base") -> t.Dict[str, t.Any] | t.Any:
+    def get_pk(self) -> t.Dict[str, t.Any] | t.Any:
         """Get pk."""
-        server_default_pks = (pk for pk in cls.__mapper__.primary_key if pk.server_default is not None)  # type: ignore
+        server_default_pks = (pk for pk in self.__mapper__.primary_key if pk.server_default is not None)  # type: ignore
         pks = {
-            pk.name: attr for pk in server_default_pks if (attr := getattr(object_instance, pk.name)) is not None
+            pk.name: attr for pk in server_default_pks if (attr := getattr(self, pk.name)) is not None
         }  # noqa, type: ignore
 
         if len(pks) == 1:
@@ -47,10 +46,9 @@ class Base(DeclarativeBase):
 
         return None
 
-    @classmethod
-    def has_pk(cls, object_instance: "Base") -> bool:
+    def has_pk(self) -> bool:
         """Model has pk."""
-        return bool(cls.get_pk(object_instance))
+        return bool(self.get_pk())
 
     @classmethod
     async def get_all(cls, async_session: AsyncSession) -> t.List[t.Optional["Base"]]:  # type: ignore
@@ -62,7 +60,7 @@ class Base(DeclarativeBase):
 
     @overload
     async def pre_save(cls, async_session: AsyncSession, instance: "Base", **kwargs: t.Any) -> "Base":  # noqa
-        if cls.has_pk(instance):
+        if instance.has_pk():
             return await async_session.merge(instance, **kwargs)
 
         async_session.add(instance, **kwargs)
@@ -77,8 +75,8 @@ class Base(DeclarativeBase):
         return instances
 
     @overload
-    async def save(cls, async_session: AsyncSession, instance: "Base", **kwargs: t.Any) -> "Base":  # noqa
-        instance = await cls.pre_save(async_session, instance, **kwargs)
+    async def save(self, async_session: AsyncSession, **kwargs: t.Any) -> "Base":  # noqa
+        instance = await self.pre_save(async_session, self, **kwargs)
         await async_session.commit()
         return instance
 
