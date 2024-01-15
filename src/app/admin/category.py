@@ -19,4 +19,15 @@ class CategoryAdmin(ModelView, model=Category):
         Category.deleted_at,
     ]
 
+    form_ajax_refs = {
+        "parent_category": {
+            "fields": ("id", "category_title"),
+            "order_by": "id",
+        },
+        "service": {
+            "fields": ("id", "name"),
+            "order_by": "id",
+        },
+    }
+
     column_labels = {Category.service: "Service"}
