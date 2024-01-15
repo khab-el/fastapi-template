@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.admin import (
     CategoryAdmin,
     ProviderContactAdmin,
-    ProviderEnityAdmin,
+    ProviderEntityAdmin,
     ProviderPhotoAdmin,
     ServiceAdmin,
     UserAdmin,
@@ -81,7 +81,7 @@ def get_application() -> FastAPI:
     admin.add_view(ServiceAdmin)
     admin.add_view(ProviderContactAdmin)
     admin.add_view(ProviderPhotoAdmin)
-    admin.add_view(ProviderEnityAdmin)
+    admin.add_view(ProviderEntityAdmin)
 
     return app
 

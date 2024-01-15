@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 89314f773eaa
+Revision ID: e2aebc888fa0
 Revises: 
-Create Date: 2024-01-13 22:17:49.774510
+Create Date: 2024-01-15 17:01:11.074813
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from sqlalchemy import FetchedValue
 
 
 # revision identifiers, used by Alembic.
-revision = "89314f773eaa"
+revision = "e2aebc888fa0"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -66,7 +66,7 @@ def upgrade():
     op.create_index(op.f("ix_user_email"), "user", ["email"], unique=False)
     op.create_index(op.f("ix_user_id"), "user", ["id"], unique=False)
     op.create_table(
-        "providerenity",
+        "providerentity",
         sa.Column("address", sa.String(length=255), nullable=True),
         sa.Column("primary_phone", sa.String(length=255), nullable=True),
         sa.Column("secondary_phone", sa.String(length=255), nullable=True),
@@ -80,11 +80,11 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["provider_contact_id"],
             ["providercontact.id"],
-            name=op.f("fk_providerenity_provider_contact_id_providercontact"),
+            name=op.f("fk_providerentity_provider_contact_id_providercontact"),
         ),
-        sa.PrimaryKeyConstraint("id", name=op.f("pk_providerenity")),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_providerentity")),
     )
-    op.create_index(op.f("ix_providerenity_id"), "providerenity", ["id"], unique=False)
+    op.create_index(op.f("ix_providerentity_id"), "providerentity", ["id"], unique=False)
     op.create_table(
         "providerphoto",
         sa.Column("picture_path", sa.String(length=255), nullable=True),
@@ -109,7 +109,7 @@ def upgrade():
         sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["provider_entity_id"], ["providerenity.id"], name=op.f("fk_service_provider_entity_id_providerenity")
+            ["provider_entity_id"], ["providerentity.id"], name=op.f("fk_service_provider_entity_id_providerentity")
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_service")),
     )
@@ -140,8 +140,8 @@ def downgrade():
     op.drop_table("service")
     op.drop_index(op.f("ix_providerphoto_id"), table_name="providerphoto")
     op.drop_table("providerphoto")
-    op.drop_index(op.f("ix_providerenity_id"), table_name="providerenity")
-    op.drop_table("providerenity")
+    op.drop_index(op.f("ix_providerentity_id"), table_name="providerentity")
+    op.drop_table("providerentity")
     op.drop_index(op.f("ix_user_id"), table_name="user")
     op.drop_index(op.f("ix_user_email"), table_name="user")
     op.drop_table("user")

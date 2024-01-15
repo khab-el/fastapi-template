@@ -5,6 +5,7 @@ from src.app.entity import Category
 
 class CategoryAdmin(ModelView, model=Category):
     can_create = True
+    name_plural = "Categories"
     column_list = [
         Category.id,
         Category.category_title,
@@ -17,3 +18,5 @@ class CategoryAdmin(ModelView, model=Category):
         Category.updated_at,
         Category.deleted_at,
     ]
+
+    column_labels = {Category.service: "Service"}
