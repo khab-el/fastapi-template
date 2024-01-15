@@ -10,9 +10,3 @@ class ProviderPhotoAdmin(ModelView, model=ProviderPhoto):
         ProviderPhoto.picture_path,
         ProviderPhoto.provider_contact,
     ]
-
-    form_columns = [
-        ProviderPhoto.picture_path,
-        ProviderPhoto.provider_contact_id,
-        ProviderPhoto.provider_contact,
-    ]

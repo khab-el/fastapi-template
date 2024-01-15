@@ -13,11 +13,8 @@ class ServiceAdmin(ModelView, model=Service):
         Service.deleted_at,
     ]
 
-    form_columns = [
-        Service.name,
-        Service.url,
-        Service.operating_hours,
-        Service.provider_entity_id,
-        Service.provider_entity,
-        Service.category,
+    form_excluded_columns = [
+        Service.created_at,
+        Service.updated_at,
+        Service.deleted_at,
     ]

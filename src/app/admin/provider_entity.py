@@ -14,13 +14,8 @@ class ProviderEnityAdmin(ModelView, model=ProviderEnity):
         ProviderEnity.deleted_at,
     ]
 
-    form_columns = [
-        ProviderEnity.address,
-        ProviderEnity.primary_phone,
-        ProviderEnity.secondary_phone,
-        ProviderEnity.lat,
-        ProviderEnity.lon,
-        ProviderEnity.provider_contact_id,
-        ProviderEnity.provider_contact,
-        ProviderEnity.service,
+    form_excluded_columns = [
+        ProviderEnity.created_at,
+        ProviderEnity.updated_at,
+        ProviderEnity.deleted_at,
     ]

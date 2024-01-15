@@ -12,10 +12,8 @@ class CategoryAdmin(ModelView, model=Category):
         Category.service,
     ]
 
-    form_columns = [
-        Category.category_title,
-        Category.category_description,
-        Category.parent_category_id,
-        Category.parent_category,
-        Category.service,
+    form_excluded_columns = [
+        Category.created_at,
+        Category.updated_at,
+        Category.deleted_at,
     ]

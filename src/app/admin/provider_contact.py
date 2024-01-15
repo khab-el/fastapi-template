@@ -14,11 +14,8 @@ class ProviderContactAdmin(ModelView, model=ProviderContact):
         ProviderContact.deleted_at,
     ]
 
-    form_columns = [
-        ProviderContact.name,
-        ProviderContact.phone,
-        ProviderContact.email,
-        ProviderContact.additional_info,
-        ProviderContact.provider_entity,
-        ProviderContact.provider_photo,
+    form_excluded_columns = [
+        ProviderContact.created_at,
+        ProviderContact.updated_at,
+        ProviderContact.deleted_at,
     ]

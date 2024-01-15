@@ -24,7 +24,7 @@ class Category(TimestampMixin, Base):
         "Category",
         remote_side="Category.id",
     )
-    service: Mapped["Service"] = relationship(
+    service: Mapped[list["Service"]] = relationship(
         "Service",
         secondary="category_x_service",
         back_populates="category",
