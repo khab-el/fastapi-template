@@ -1,82 +1,83 @@
 """Application implementation - custom FastAPI HTTP exception with handler."""
-from typing import Any, Dict, Optional
+from typing import Dict, TypeVar
 
-from fastapi import Request
+import logging
+
+from fastapi import Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+Exc = TypeVar("Exc", bound=Exception)
+
+log = logging.getLogger(__name__)
 
 
-class HTTPException(Exception):
-    """Define custom HTTPException class definition.
-
-    This exception combined with exception_handler method allows you to use it
-    the same manner as you'd use FastAPI.HTTPException with one difference. You
-    have freedom to define returned response body, whereas in
-    FastAPI.HTTPException content is returned under "detail" JSON key.
-
-    FastAPI.HTTPException source:
-    https://github.com/tiangolo/fastapi/blob/master/fastapi/exceptions.py
-
-    """
-
-    def __init__(
-        self,
-        status_code: int,
-        content: Any = None,
-        headers: Optional[Dict[str, Any]] = None,
-    ) -> None:
-        """Initialize HTTPException class object instance.
-
-        Args:
-            status_code (int): HTTP error status code.
-            content (Any): Response body.
-            headers (Optional[Dict[str, Any]]): Additional response headers.
-
-        """
-        self.status_code = status_code
-        self.content = content
-        self.headers = headers
-
-    def __repr__(self) -> str:
-        """Class custom __repr__ method implementation.
-
-        Returns:
-            str: HTTPException string object.
-
-        """
-        kwargs = []
-
-        for key, value in self.__dict__.items():
-            if not key.startswith("_"):
-                kwargs.append(f"{key}={value!r}")
-
-        return f"{self.__class__.__name__}({', '.join(kwargs)})"
+class ApiError(BaseModel):
+    message: str
 
 
-async def http_exception_handler(
+class ApiErrorResponse(BaseModel):
+    success: bool = False
+    errors: list[ApiError]
+
+
+def pyd2hr(exc: RequestValidationError) -> list[Dict]:
+    """Pydantic error format."""
+    unique_errors = {
+        (".".join(map(str, err["loc"])), err["msg"])
+        for err in exc.errors()
+        if err["type"] != "type_error.dict"  # https://github.com/samuelcolvin/pydantic/issues/2973
+    }
+    return [{"field": e[0], "message": e[1]} for e in unique_errors]
+
+
+async def log_exception(request: Request, exception: Exc) -> None:
+    """Log exception."""
+    method = request.scope["method"]
+    path = request.url.path
+    req_params = request.query_params
+    req_body = await request.body()
+    log.exception(
+        """method - %(method)s
+        path - %(path)s
+        req body - %(req_body)s
+        req params - %(req_params)s
+        status_code - 400
+        error - %(exc)s""",
+        {
+            "method": method,
+            "path": path,
+            "req_params": req_params,
+            "req_body": req_body,
+            "exc": str(exception),
+        },
+    )
+
+
+async def request_validation_exception_handler(
     request: Request,
-    exception: HTTPException,
+    exception: RequestValidationError,
 ) -> JSONResponse:
-    """Define custom HTTPException handler.
-
-    In this application custom handler is added in asgi.py while initializing
-    FastAPI application. This is needed in order to handle custom HTTException
-    globally.
-
-    More details:
-    https://fastapi.tiangolo.com/tutorial/handling-errors/#install-custom-exception-handlers
-
-    Args:
-        request (starlette.requests.Request): Request class object instance.
-            More details: https://www.starlette.io/requests/
-        exception (HTTPException): Custom HTTPException class object instance.
-
-    Returns:
-        FastAPI.response.JSONResponse class object instance initialized with
-            kwargs from custom HTTPException.
-
-    """
+    """Define custom RequestValidationError handler."""
+    await log_exception(request, exception)
+    errors = pyd2hr(exception)
+    data = ApiErrorResponse(errors=errors)
     return JSONResponse(
-        status_code=exception.status_code,
-        content=exception.content,
-        headers=exception.headers,
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=data.model_dump(),
+    )
+
+
+async def global_exception_handler(
+    request: Request,
+    exception: Exception,
+) -> JSONResponse:
+    """Define custom Global Exception handler."""
+    await log_exception(request, exception)
+    errors = [{"message": f"{exception.__class__}: {str(exception)}"}]
+    data = ApiErrorResponse(errors=errors)
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=data.model_dump(),
     )

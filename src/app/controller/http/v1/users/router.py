@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Request
 
-from src.app.dto import ErrorResponse
+from src.app.dto import ErrorResponse, SingleUserResponse, UserCreate
 from src.app.entity import User
 
 log = logging.getLogger(__name__)
@@ -18,7 +18,18 @@ users_router = APIRouter(
     status_code=200,
     responses={502: {"model": ErrorResponse}},
 )
-async def get_users(request: Request):
+async def get_users(request: Request) -> list[SingleUserResponse | None]:
     """ping."""
     res = await User.get_all(request.state.db_session)
+    return res
+
+
+@users_router.post(
+    "/",
+    status_code=201,
+    responses={502: {"model": ErrorResponse}},
+)
+async def create_user(request: Request, user: UserCreate) -> SingleUserResponse:
+    """ping."""
+    res = await User(**user).save(request.state.db_session)
     return res

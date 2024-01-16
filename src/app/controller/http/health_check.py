@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 srv_router = APIRouter(
     tags=["helth_check"],
-    # include_in_schema=False,
+    include_in_schema=False,
 )
 
 
