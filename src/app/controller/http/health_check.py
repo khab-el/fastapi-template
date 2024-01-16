@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import PlainTextResponse
 from sqlalchemy import text
 
-from src.app.dto import ErrorResponse, ReadyResponse
+from src.app.dto import ReadyResponse
 from src.app.modules import AsyncDBClient
 
 log = logging.getLogger(__name__)
@@ -21,7 +21,6 @@ srv_router = APIRouter(
     response_model=ReadyResponse,
     summary="Simple health check.",
     status_code=200,
-    responses={502: {"model": ErrorResponse}},
 )
 async def ping(request: Request) -> ReadyResponse:
     """ping."""
