@@ -2,7 +2,6 @@ import logging
 import time
 
 from fastapi import Request
-from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
@@ -27,15 +26,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         metrics.requests.labels(path, method).inc()
 
-        try:
-            response = await call_next(request)
-        except Exception as exc:
-            log.exception("%(method)s, %(path)s, status - 500", {"method": method, "path": path})
-            data = {
-                "success": False,
-                "errors": [{"message": str(exc)}],
-            }
-            response = JSONResponse(data, status_code=500)
+        response = await call_next(request)
 
         elapsed = time.monotonic() - ts_start
         metrics.timings.labels(path, method).observe(elapsed)

@@ -14,7 +14,7 @@ Resources:
     https://pydantic-docs.helpmanual.io/
 
 """
-from src.app.asgi import get_application
+from src.app.asgi import app
 
 
-__all__ = ("get_application",)
+__all__ = ("app",)

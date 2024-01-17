@@ -1,27 +1,33 @@
 import typing as t
 
+import contextlib
 import logging
 import time
 from uuid import uuid4
 
 from sqlalchemy import text
 from sqlalchemy.engine.row import Row
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.exc import DBAPIError
 
+from src.app.modules.exception_utils import leaf_generator
 from src.config import settings
+
+
+class AlreadyExistError(Exception):
+    pass
 
 
 class AsyncDBClient:
 
     _connection_flg: bool = False
     async_engine: AsyncEngine
-    AsyncSessionLocal: async_sessionmaker[AsyncSession]
+    sessionmaker: async_sessionmaker[AsyncSession]
     log: logging.Logger = logging.getLogger(__name__)
 
     @classmethod
@@ -37,8 +43,12 @@ class AsyncDBClient:
                 settings.DB_URI,
                 pool_pre_ping=True,
                 echo=settings.ECHO_SQL,
+                pool_size=settings.DB_MAX_CONNECTIONS,
+                pool_recycle=settings.DB_POOL_RECYCLE,
+                max_overflow=settings.DB_POOL_OVERFLOW,
+                pool_timeout=settings.DB_POOL_TIMEOUT,
             )
-            cls.AsyncSessionLocal = async_sessionmaker(
+            cls.sessionmaker = async_sessionmaker(
                 bind=cls.async_engine,
                 expire_on_commit=False,
                 autoflush=False,
@@ -55,21 +65,39 @@ class AsyncDBClient:
             cls._connection_flg = False
 
     @classmethod
-    async def _get_session(cls) -> t.AsyncIterator[async_sessionmaker[AsyncSession]]:
-        """Helper."""
+    @contextlib.asynccontextmanager
+    async def session(cls) -> t.AsyncIterator[AsyncSession]:
+        """Create session."""
+        if cls.sessionmaker is None:
+            raise Exception("DatabaseSessionManager is not initialized")
+
+        session = cls.sessionmaker()
         try:
-            yield cls.AsyncSessionLocal
-        except SQLAlchemyError as e:
-            cls.log.exception(e)
+            yield session
+        except* DBAPIError as eq:
+            for (_, (exc, _)) in enumerate(leaf_generator(eq)):
+                cls.log.exception(str(exc))
+                if isinstance(exc, DBAPIError):
+                    unique_violation_error = any(
+                        (
+                            True
+                            for arg in exc.orig.args
+                            if "<class \'asyncpg.exceptions.UniqueViolationError\'>:" in arg
+                        ),
+                    )
+                    if unique_violation_error:
+                        raise AlreadyExistError(exc.orig.__str__().split("\n")[-1])
+        except* Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
 
     @classmethod
-    async def get_session(cls) -> async_sessionmaker[AsyncSession]:
-        """Get async db session.
-
-        :return: _description_
-        :rtype: async_sessionmaker
-        """
-        return await anext(cls._get_session())
+    async def get_db_session(cls) -> t.AsyncIterator[AsyncSession]:
+        """Get db session."""
+        async with cls.session() as session:
+            yield session
 
     @classmethod
     async def iter_cursor(

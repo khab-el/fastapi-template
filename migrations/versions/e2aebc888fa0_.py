@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5e235bbba1fc
+Revision ID: e2aebc888fa0
 Revises: 
-Create Date: 2023-09-13 20:24:38.767450
+Create Date: 2024-01-15 17:01:11.074813
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from sqlalchemy import FetchedValue
 
 
 # revision identifiers, used by Alembic.
-revision = "5e235bbba1fc"
+revision = "e2aebc888fa0"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,13 +29,12 @@ def upgrade():
         sa.Column("parent_category_id", sa.UUID(), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["parent_category_id"],
-            ["category.id"],
+            ["parent_category_id"], ["category.id"], name=op.f("fk_category_parent_category_id_category")
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_category")),
     )
     op.create_index(op.f("ix_category_id"), "category", ["id"], unique=False)
     op.create_table(
@@ -46,9 +45,9 @@ def upgrade():
         sa.Column("additional_info", sa.String(length=255), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_providercontact")),
     )
     op.create_index(op.f("ix_providercontact_id"), "providercontact", ["id"], unique=False)
     op.create_table(
@@ -58,16 +57,16 @@ def upgrade():
         sa.Column("email", sa.String(length=255), nullable=False),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("email"),
-        sa.UniqueConstraint("username"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_user")),
+        sa.UniqueConstraint("email", name=op.f("uq_user_email")),
+        sa.UniqueConstraint("username", name=op.f("uq_user_username")),
     )
     op.create_index(op.f("ix_user_email"), "user", ["email"], unique=False)
     op.create_index(op.f("ix_user_id"), "user", ["id"], unique=False)
     op.create_table(
-        "providerenity",
+        "providerentity",
         sa.Column("address", sa.String(length=255), nullable=True),
         sa.Column("primary_phone", sa.String(length=255), nullable=True),
         sa.Column("secondary_phone", sa.String(length=255), nullable=True),
@@ -76,15 +75,16 @@ def upgrade():
         sa.Column("provider_contact_id", sa.UUID(), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
             ["provider_contact_id"],
             ["providercontact.id"],
+            name=op.f("fk_providerentity_provider_contact_id_providercontact"),
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_providerentity")),
     )
-    op.create_index(op.f("ix_providerenity_id"), "providerenity", ["id"], unique=False)
+    op.create_index(op.f("ix_providerentity_id"), "providerentity", ["id"], unique=False)
     op.create_table(
         "providerphoto",
         sa.Column("picture_path", sa.String(length=255), nullable=True),
@@ -93,8 +93,9 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ["provider_contact_id"],
             ["providercontact.id"],
+            name=op.f("fk_providerphoto_provider_contact_id_providercontact"),
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_providerphoto")),
     )
     op.create_index(op.f("ix_providerphoto_id"), "providerphoto", ["id"], unique=False)
     op.create_table(
@@ -105,13 +106,12 @@ def upgrade():
         sa.Column("provider_entity_id", sa.UUID(), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
-        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=False),
+        sa.Column("deleted_at", sa.DateTime(), server_default=FetchedValue(), nullable=True),
         sa.Column("id", sa.UUID(), server_default=sa.text("gen_random_uuid()"), nullable=False),
         sa.ForeignKeyConstraint(
-            ["provider_entity_id"],
-            ["providerenity.id"],
+            ["provider_entity_id"], ["providerentity.id"], name=op.f("fk_service_provider_entity_id_providerentity")
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_service")),
     )
     op.create_index(op.f("ix_service_id"), "service", ["id"], unique=False)
     op.create_table(
@@ -119,14 +119,10 @@ def upgrade():
         sa.Column("category_id", sa.UUID(), nullable=False),
         sa.Column("service_id", sa.UUID(), nullable=False),
         sa.ForeignKeyConstraint(
-            ["category_id"],
-            ["category.id"],
+            ["category_id"], ["category.id"], name=op.f("fk_category_x_service_category_id_category")
         ),
-        sa.ForeignKeyConstraint(
-            ["service_id"],
-            ["service.id"],
-        ),
-        sa.PrimaryKeyConstraint("category_id", "service_id"),
+        sa.ForeignKeyConstraint(["service_id"], ["service.id"], name=op.f("fk_category_x_service_service_id_service")),
+        sa.PrimaryKeyConstraint("category_id", "service_id", name=op.f("pk_category_x_service")),
     )
     # ### end Alembic commands ###
 
@@ -144,8 +140,8 @@ def downgrade():
     op.drop_table("service")
     op.drop_index(op.f("ix_providerphoto_id"), table_name="providerphoto")
     op.drop_table("providerphoto")
-    op.drop_index(op.f("ix_providerenity_id"), table_name="providerenity")
-    op.drop_table("providerenity")
+    op.drop_index(op.f("ix_providerentity_id"), table_name="providerentity")
+    op.drop_table("providerentity")
     op.drop_index(op.f("ix_user_id"), table_name="user")
     op.drop_index(op.f("ix_user_email"), table_name="user")
     op.drop_table("user")

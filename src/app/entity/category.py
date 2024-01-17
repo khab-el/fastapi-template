@@ -22,9 +22,9 @@ class Category(TimestampMixin, Base):
     parent_category_id: Mapped[list[UUID]] = mapped_column(sa.ForeignKey("category.id"), nullable=True)
     parent_category: Mapped["t.Self"] = relationship(
         "Category",
-        remote_side="category.id",
+        remote_side="Category.id",
     )
-    service: Mapped["Service"] = relationship(
+    service: Mapped[list["Service"]] = relationship(
         "Service",
         secondary="category_x_service",
         back_populates="category",

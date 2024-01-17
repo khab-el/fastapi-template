@@ -36,6 +36,14 @@ install:  ## Install core with poetry
 image:  ## Build core image
 	@build/image.sh
 
+.PHONY: local-db
+local-db:  ## Run local db in docker
+	@build/db.sh
+
+.PHONY: start-service
+start-service:  ## Run local service
+	core serve --bind 0.0.0.0:8000
+
 .PHONY: pre-commit-install
 pre-commit-install:  ## Install pre-commit hook
 	poetry run pre-commit install

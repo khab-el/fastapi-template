@@ -15,7 +15,7 @@ if t.TYPE_CHECKING:
     from src.app.entity.service import Service
 
 
-class ProviderEnity(TimestampMixin, Base):
+class ProviderEntity(TimestampMixin, Base):
 
     address: Mapped[str] = mapped_column(sa.String(255), nullable=True)
     primary_phone: Mapped[str] = mapped_column(sa.String(255), nullable=True)
