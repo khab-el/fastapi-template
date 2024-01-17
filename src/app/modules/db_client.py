@@ -7,15 +7,20 @@ from uuid import uuid4
 
 from sqlalchemy import text
 from sqlalchemy.engine.row import Row
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.exc import DBAPIError
 
+from src.app.modules.exception_utils import leaf_generator
 from src.config import settings
+
+
+class AlreadyExistError(Exception):
+    pass
 
 
 class AsyncDBClient:
@@ -38,6 +43,10 @@ class AsyncDBClient:
                 settings.DB_URI,
                 pool_pre_ping=True,
                 echo=settings.ECHO_SQL,
+                pool_size=settings.DB_MAX_CONNECTIONS,
+                pool_recycle=settings.DB_POOL_RECYCLE,
+                max_overflow=settings.DB_POOL_OVERFLOW,
+                pool_timeout=settings.DB_POOL_TIMEOUT,
             )
             cls.sessionmaker = async_sessionmaker(
                 bind=cls.async_engine,
@@ -65,8 +74,20 @@ class AsyncDBClient:
         session = cls.sessionmaker()
         try:
             yield session
-        except SQLAlchemyError as e:
-            cls.log.exception(e)
+        except* DBAPIError as eq:
+            for (_, (exc, _)) in enumerate(leaf_generator(eq)):
+                cls.log.exception(str(exc))
+                if isinstance(exc, DBAPIError):
+                    unique_violation_error = any(
+                        (
+                            True
+                            for arg in exc.orig.args
+                            if "<class \'asyncpg.exceptions.UniqueViolationError\'>:" in arg
+                        ),
+                    )
+                    if unique_violation_error:
+                        raise AlreadyExistError(exc.orig.__str__().split("\n")[-1])
+        except* Exception:
             await session.rollback()
             raise
         finally:

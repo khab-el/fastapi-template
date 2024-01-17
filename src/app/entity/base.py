@@ -55,7 +55,7 @@ class Base(DeclarativeBase):
         """Select from db single model by pk - id."""
         stmt = sa.select(cls)
         async_result = await async_session.execute(statement=stmt)
-        objects_all = async_result.fetchall()
+        objects_all = async_result.scalars().all()
         return objects_all
 
     @overload

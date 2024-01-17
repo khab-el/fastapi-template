@@ -8,9 +8,8 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
-from src.app.exceptions import ApiExceptionResponse, ApiInvalidResponse
-
-Exc = t.TypeVar("Exc", bound=Exception)
+from src.app.exceptions import ApiExceptionResponse, ApiInvalidResponse, ApiError
+from src.app.modules import AlreadyExistError, leaf_generator
 
 log = logging.getLogger(__name__)
 
@@ -25,16 +24,18 @@ def pyd2hr(exc: RequestValidationError) -> list[dict[str, t.Any]]:
     return [{"field": e[0], "message": e[1]} for e in unique_errors]
 
 
-async def log_exception(request: Request, exception: Exc) -> None:
+async def log_exception(request: Request, exception: t.Type[Exception] | None) -> None:
     """Log exception."""
+    if not exception:
+        return
+
     method = request.scope["method"]
     path = request.url.path
     req_params = request.query_params
-    req_body = await request.body()
+
     log.exception(
         """method - %(method)s
         path - %(path)s
-        req body - %(req_body)s
         req params - %(req_params)s
         status_code - 400
         error - %(exc)s""",
@@ -42,10 +43,45 @@ async def log_exception(request: Request, exception: Exc) -> None:
             "method": method,
             "path": path,
             "req_params": req_params,
-            "req_body": req_body,
             "exc": str(exception),
         },
+        exc_info=True,
     )
+
+
+def prepare_bad_response(errors: list[ApiError], status: int, validation_error: bool = False) -> JSONResponse:
+    """Prepare bad response.
+
+    :param errors: _description_
+    :type errors: list[ApiError]
+    :param status: _description_
+    :type status: int
+    :return: _description_
+    :rtype: JSONResponse
+    """
+    if validation_error:
+        data = ApiInvalidResponse(errors=errors)
+    else:
+        data = ApiExceptionResponse(errors=errors)
+    return JSONResponse(
+        status_code=status,
+        content=data.model_dump(),
+    )
+
+
+def prepare_exception_group_errors(eg: ExceptionGroup) -> tuple[list[dict[str, t.Any]], Exception]:
+    """Parse catched exception group error.
+
+    :param eg: _description_
+    :type eg: ExceptionGroup
+    :return: _description_
+    :rtype: list[dict[str, t.Any]]
+    """
+    errors = []
+    for (_, (exc, _)) in enumerate(leaf_generator(eg)):
+        if isinstance(exc, AlreadyExistError):
+            errors.append({"message": str(exc)})
+    return errors, exc
 
 
 class ExceptionMiddleware(BaseHTTPMiddleware):
@@ -59,23 +95,19 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
         :return: _description_
         :rtype: Response
         """
+        exc = None
         try:
             response = await call_next(request)
         except RequestValidationError as exc:
-            await log_exception(request, exc)
             errors = pyd2hr(exc)
-            data = ApiInvalidResponse(errors=errors)
-            response = JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content=data.model_dump(),
-            )
+            response = prepare_bad_response(errors=errors, status=status.HTTP_400_BAD_REQUEST, validation_error=True)
+        except ExceptionGroup as eg:
+            errors, exc = prepare_exception_group_errors(eg=eg)
+            response = prepare_bad_response(errors=errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exc:
-            await log_exception(request, exc)
             errors = [{"message": f"{exc.__class__} - {str(exc)}"}]
-            data = ApiExceptionResponse(errors=errors)
-            response = JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content=data.model_dump(),
-            )
+            response = prepare_bad_response(errors=errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        await log_exception(request, exc)
 
         return response
